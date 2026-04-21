@@ -1,4 +1,3 @@
-```python
 import random
 import telebot
 import os
@@ -87,4 +86,3 @@ def handle_message(message):
 # === ЗАПУСК ===
 print("Бот с новыми фразами запущен на Render!")
 bot.infinity_polling()
-```
