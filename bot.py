@@ -79,8 +79,7 @@ def handle_message(message):
         return
 
     # 3. Проверка на маты
-    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нах", "нахуй", "залупа", "мудак", "гандон", "пидор", " пидар", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", " 
-    хуйло", "хуесос"]
+    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нах", "нахуй", "залупа", "мудак", "гандон", "пидор", " пидар", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", "хуйло", "хуесос"]
     if any(word in text for word in bad_words):
         bot.reply_to(message, random.choice(["Без матов чурка", "Без матов существо"]))
         return
@@ -99,6 +98,8 @@ def handle_message(message):
     if "пдф" in text or "педофил" in text:
         bot.reply_to(message, "что плохого в пдф?")
         return
+
+    bot.reply_to(message, random.choice(PHRASES))
 
 print("Бот запущен на Render!")
 bot.infinity_polling()
