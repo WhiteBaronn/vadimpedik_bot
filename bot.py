@@ -8,7 +8,8 @@ if not TOKEN:
 
 bot = telebot.TeleBot(TOKEN)
 
-# === СЛОВАРЬ СЛУЧАЙНЫХ ФРАЗ ===
+user_state = {}
+
 PHRASES = [
     "Самый умный либерал:",
     "Самый натурал западник:",
@@ -33,39 +34,58 @@ PHRASES = [
     "Кидай кожу",
     "Кидай живот",
     "Мясо",
+    "Ммм мясо",
+    "А пососать?", 
+    "А ты знаешь что нужно делать с лживым гавном?", 
+    "Розбань", 
     "База",
     "Фу",
     "Извинись перед моей мамой",
     "Бред",
-    "Кидай голый кружок с извинениями", 
-    "Ты женщина?",
-    "Ты мальчик или девочка?"
+    "Кидай голый кружок с извинениями",
+    "Ты женщина?", 
+    "Ты девочка или мальчик?"
 ]
 
-# === ОБРАБОТЧИК СООБЩЕНИЙ ===
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
+    user_id = message.from_user.id
     text = message.text.lower().strip()
-    chat_id = message.chat.id
+    original_text = message.text.strip()  # ← ВОТ ЭТА СТРОЧКА БЫЛА ПРОПУЩЕНА!
+
+    # Проверка: ждём ли мы ответа
+    if user_id in user_state:
+        question_type = user_state[user_id]
+        del user_state[user_id]
+        
+        if question_type == "woman":
+            if text in ["да", "да.", "да!"]:
+                bot.reply_to(message, "Кидай кружок")
+                return
+        elif question_type == "girl_or_boy":
+            if text in ["девочка", "девушка", "женщина"]:
+                bot.reply_to(message, "Кидай кружок")
+                return
 
     # 1. Проверка на "сам"
     if text == "сам":
         bot.reply_to(message, "Ооо, стрелки пошли")
         return
 
-        # 2. Проверка на "бог" с маленькой буквы (в оригинале)
+    # 2. Проверка на "бог" с маленькой буквы
     words_original = original_text.split()
     if "бог" in words_original:
         bot.reply_to(message, "Бог с большой*")
         return
-        
-    # 3. Проверка на маты (список ключевых слов)
-    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нахуй", "нах", "залупа", "мудак", "гандон", "пидор", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", "хуйло"]
+
+    # 3. Проверка на маты
+    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нах", "нахуй", "залупа", "мудак", "гандон", "пидор", " пидар", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", " 
+    хуйло", "хуесос"]
     if any(word in text for word in bad_words):
         bot.reply_to(message, random.choice(["Без матов чурка", "Без матов существо"]))
         return
 
-    # 4. Проверка на "жир", "жыр", "жырны", "жирный"
+    # 4. Проверка на "жир"
     if any(word in text for word in ["жир", "жыр", "жырны", "жирный"]):
         bot.reply_to(message, "Я не жирный")
         return
@@ -77,12 +97,8 @@ def handle_message(message):
 
     # 6. Проверка на "пдф" или "педофил"
     if "пдф" in text or "педофил" in text:
-        bot.reply_to(message, "Что плохого в пдф?")
+        bot.reply_to(message, "что плохого в пдф?")
         return
 
-    # 8. Если ничего не подошло — случайная фраза
-    bot.reply_to(message, random.choice(PHRASES))
-
-# === ЗАПУСК ===
-print("Бот с новыми фразами запущен на Render!")
+print("Бот запущен на Render!")
 bot.infinity_polling()
