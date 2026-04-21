@@ -8,6 +8,10 @@ if not TOKEN:
 
 bot = telebot.TeleBot(TOKEN)
 
+# Получаем username бота для проверки пинга
+bot_info = bot.get_me()
+BOT_USERNAME = f"@{bot_info.username}".lower()
+
 user_state = {}
 
 PHRASES = [
@@ -51,7 +55,27 @@ PHRASES = [
 def handle_message(message):
     user_id = message.from_user.id
     text = message.text.lower().strip()
-    original_text = message.text.strip()  # ← ВОТ ЭТА СТРОЧКА БЫЛА ПРОПУЩЕНА!
+    original_text = message.text.strip()
+
+    # === НОВАЯ ЛОГИКА: ПРОВЕРЯЕМ, НУЖНО ЛИ ОТВЕЧАТЬ ===
+    should_reply = False
+    
+    # 1. Пинг (сообщение содержит @username_бота)
+    if BOT_USERNAME in text:
+        should_reply = True
+    
+    # 2. Ответ на сообщение бота (reply)
+    if message.reply_to_message and message.reply_to_message.from_user.id == bot_info.id:
+        should_reply = True
+    
+    # 3. Обычное сообщение — 5% шанс
+    if not should_reply:
+        if random.random() < 0.05:
+            should_reply = True
+        else:
+            return  # Не отвечаем
+
+    # === ДАЛЬШЕ ВАШ ОРИГИНАЛЬНЫЙ КОД БЕЗ ИЗМЕНЕНИЙ ===
 
     # Проверка: ждём ли мы ответа
     if user_id in user_state:
@@ -79,14 +103,14 @@ def handle_message(message):
         return
 
     # 3. Проверка на маты
-    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нах", "нахуй", "залупа", "мудак", "гандон", "пидор", " пидар", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", "хуйло", "хуесос"]
+    bad_words = ["бля", "блять", "блядь", "хуй", "пизда", "еба", "ебать", "ебля", "сука", "нахуй", "залупа", "мудак", "гандон", "пидор", " пидар", "долбоеб", "долбаеб", "уебан", "еблан", "выебан", "хуйло", "хуесос"]
     if any(word in text for word in bad_words):
         bot.reply_to(message, random.choice(["Без матов чурка", "Без матов существо"]))
         return
 
     # 4. Проверка на "жир"
     if any(word in text for word in ["жир", "жыр", "жырны", "жирный"]):
-        bot.reply_to(message, "Я не жирный")
+        bot.reply_to(message, "Я не жирный", " Мда, свин хрюкает про жир", "Одододо")
         return
 
     # 5. Проверка на "чурка"
@@ -96,7 +120,7 @@ def handle_message(message):
 
     # 6. Проверка на "пдф" или "педофил"
     if "пдф" in text or "педофил" in text:
-        bot.reply_to(message, "что плохого в пдф?")
+        bot.reply_to(message, "Что плохого в пдф?", "Я христианин с пдф вайбом")
         return
 
     bot.reply_to(message, random.choice(PHRASES))
