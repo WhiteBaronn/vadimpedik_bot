@@ -120,7 +120,7 @@ def handle_message(message):
 
     # 6. Проверка на "пдф" или "педофил"
     if "пдф" in text or "педофил" in text:
-        bot.reply_to(message, "Что плохого в пдф?", "Я христианин с пдф вайбом")
+        bot.reply_to(message, random.choice(["что плохого в пдф?", "Я христианин с пдф вайбом"]))
         return
 
     bot.reply_to(message, random.choice(PHRASES))
