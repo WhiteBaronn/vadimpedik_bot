@@ -1,10 +1,33 @@
 import random
 import telebot
 import os
+import time
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TOKEN = os.environ.get("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("Токен не найден! Добавь BOT_TOKEN в Environment Variables.")
+    
+# === ФЕЙКОВЫЙ ВЕБ-СЕРВЕР ДЛЯ RENDER ===
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b'Bot is running!')
+
+    def log_message(self, format, *args):
+        pass  # Не засоряем логи
+
+def run_web_server():
+    port = int(os.environ.get('PORT', 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    print(f"🌐 Веб-сервер запущен на порту {port}")
+    server.serve_forever()
+
+# Запускаем веб-сервер в отдельном потоке
+threading.Thread(target=run_web_server, daemon=True).start()
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -92,7 +115,7 @@ def handle_message(message):
                 return
 
     # 1. Проверка на "сам"
-    if text == "сам":
+    if "сам" in text:
         bot.reply_to(message, "Ооо, стрелки пошли")
         return
 
@@ -110,7 +133,7 @@ def handle_message(message):
 
     # 4. Проверка на "жир"
     if any(word in text for word in ["жир", "жыр", "жырны", "жирный"]):
-        bot.reply_to(message, "Я не жирный", " Мда, свин хрюкает про жир", "Одододо")
+        bot.reply_to(message, random.choice(["Я не жирный", " Мда, свин хрюкает про жир", "Одододо"]))
         return
 
     # 5. Проверка на "чурка"
@@ -120,10 +143,19 @@ def handle_message(message):
 
     # 6. Проверка на "пдф" или "педофил"
     if "пдф" in text or "педофил" in text:
-        bot.reply_to(message, random.choice(["что плохого в пдф?", "Я христианин с пдф вайбом"]))
+        bot.reply_to(message, random.choice(["Что плохого в пдф?", "Я христианин с пдф вайбом"]))
         return
 
     bot.reply_to(message, random.choice(PHRASES))
 
 print("Бот запущен на Render!")
 bot.infinity_polling()
+
+# === ЗАПУСК БОТА С АВТОРЕСТАРТОМ ===
+while True:
+    try:
+        bot.infinity_polling(timeout=30, long_polling_timeout=10)
+    except Exception as e:
+        print(f"⚠️ Бот упал: {e}")
+        print("🔄 Перезапуск через 10 секунд...")
+        time.sleep(10)
