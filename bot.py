@@ -148,8 +148,8 @@ def handle_message(message):
 
     bot.reply_to(message, random.choice(PHRASES))
 
+    bot.infinity_polling()
 print("Бот запущен на Render!")
-bot.infinity_polling()
 
 # === ЗАПУСК БОТА С АВТОРЕСТАРТОМ ===
 while True:
